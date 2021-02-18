@@ -27,9 +27,9 @@
           :NewRecovered="NewRecovered"
         />
 
-        <!-- <v-col cols="12" sm="12" md="12">
-          <Barchart :chartdata="chartdata" :options="options" />
-        </v-col> -->
+        <v-col cols="12" sm="12" md="12">
+          <Barchart :labels="labels" :data="data" />
+        </v-col>
 
         <v-row>
           <v-col cols="12">
@@ -59,78 +59,65 @@
 </template>
 
 <script>
-import Navbar from './components/Navbar';
-import Table from './components/Table';
-import CovidCasesGlobal from './components/CovidCasesGlobal';
-//import Barchart from './components/Barchart';
+import Navbar from "./components/Navbar";
+import Table from "./components/Table";
+import CovidCasesGlobal from "./components/CovidCasesGlobal";
+import Barchart from "./components/Barchart";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     Navbar,
     Table,
     CovidCasesGlobal,
-    //Barchart
+    Barchart
   },
 
   data() {
     return {
-      search: '',
-      TotalCovidCases: '',
-      TotalConfirmed: '',
-      TotalDeaths: '',
-      TotalRecovered: '',
-      NewConfirmed: '',
-      NewDeaths: '',
-      NewRecovered: '',
+      search: "",
+      TotalCovidCases: "",
+      TotalConfirmed: "",
+      TotalDeaths: "",
+      TotalRecovered: "",
+      NewConfirmed: "",
+      NewDeaths: "",
+      NewRecovered: "",
       CovidCasesPerCountry: [],
       CountryList: [
         {
-          Country: 'All',
-          CountryCode: 'all'
+          Country: "All",
+          CountryCode: "all"
         }
       ],
-      select: { Country: 'Philippines', CountryCode: 'PH' },
+      select: { Country: "Philippines", CountryCode: "PH" },
       headers: [
-        { text: 'COUNTRY', value: 'Country' },
-        { text: 'NEW CONFIRMED', value: 'NewConfirmed' },
-        { text: 'NEW DEATHS', value: 'NewDeaths' },
-        { text: 'NEW RECOVERED', value: 'NewRecovered' },
-        { text: 'TOTAL CONFIRMED', value: 'TotalConfirmed' },
-        { text: 'TOTAL DEATHS', value: 'TotalDeaths' },
-        { text: 'TOTAL RECOVERED', value: 'TotalRecovered' }
+        { text: "COUNTRY", value: "Country" },
+        { text: "NEW CONFIRMED", value: "NewConfirmed" },
+        { text: "NEW DEATHS", value: "NewDeaths" },
+        { text: "NEW RECOVERED", value: "NewRecovered" },
+        { text: "TOTAL CONFIRMED", value: "TotalConfirmed" },
+        { text: "TOTAL DEATHS", value: "TotalDeaths" },
+        { text: "TOTAL RECOVERED", value: "TotalRecovered" }
       ],
-      chartdata: {
-        labels: ['Total Confirmed', 'Total Deaths', 'Total Recovered'],
-        datasets: [
-          {
-            label: 'Chart Data',
-            backgroundColor: '#f87979',
-            data: [100, 300, 400]
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      labels: [],
+      data: []
     };
   },
-
   methods: {
     getCovidSummary() {
       this.$api
-        .get('/summary')
+        .get("/summary")
         .then(res => {
           res.data.Countries.forEach(data => {
             this.CovidCasesPerCountry.push({
               Country: data.Country,
-              NewConfirmed: data.NewConfirmed.toLocaleString('en'),
-              NewDeaths: data.NewDeaths.toLocaleString('en'),
-              NewRecovered: data.NewRecovered.toLocaleString('en'),
-              TotalConfirmed: data.TotalConfirmed.toLocaleString('en'),
-              TotalDeaths: data.TotalDeaths.toLocaleString('en'),
-              TotalRecovered: data.TotalRecovered.toLocaleString('en')
+              NewConfirmed: data.NewConfirmed.toLocaleString("en"),
+              NewDeaths: data.NewDeaths.toLocaleString("en"),
+              NewRecovered: data.NewRecovered.toLocaleString("en"),
+              TotalConfirmed: data.TotalConfirmed.toLocaleString("en"),
+              TotalDeaths: data.TotalDeaths.toLocaleString("en"),
+              TotalRecovered: data.TotalRecovered.toLocaleString("en")
             });
 
             this.CountryList.push({
@@ -145,45 +132,70 @@ export default {
     },
     getCovidStatus(code) {
       var num = [];
+
+      this.labels.length = 0; //RESET LABEL
+      this.data.length = 0; // RESET DATA
+
       this.$api
-        .get('/summary')
+        .get("/summary")
         .then(res => {
-          if (code == 'all') {
+          if (code == "all") {
             this.TotalCovidCases = res.data.Global;
             this.TotalConfirmed = res.data.Global.TotalConfirmed.toLocaleString(
-              'en'
+              "en"
             );
-            this.TotalDeaths = res.data.Global.TotalDeaths.toLocaleString('en');
+            this.TotalDeaths = res.data.Global.TotalDeaths.toLocaleString("en");
             this.TotalRecovered = res.data.Global.TotalRecovered.toLocaleString(
-              'en'
+              "en"
             );
             this.NewConfirmed = res.data.Global.NewConfirmed.toLocaleString(
-              'en'
+              "en"
             );
-            this.NewDeaths = res.data.Global.NewDeaths.toLocaleString('en');
+            this.NewDeaths = res.data.Global.NewDeaths.toLocaleString("en");
             this.NewRecovered = res.data.Global.NewRecovered.toLocaleString(
-              'en'
+              "en"
+            );
+
+            this.labels.push(
+              "Total Confirmed",
+              "Total Deaths",
+              "Total Recovered"
+            );
+            this.data.push(
+              res.data.Global.TotalConfirmed,
+              res.data.Global.TotalDeaths,
+              res.data.Global.TotalRecovered
             );
             return false;
           }
 
           res.data.Countries.forEach(data => {
             if (code == data.CountryCode) {
-              this.TotalConfirmed = data.TotalConfirmed.toLocaleString('en');
-              this.TotalDeaths = data.TotalDeaths.toLocaleString('en');
-              this.TotalRecovered = data.TotalRecovered.toLocaleString('en');
+              this.TotalConfirmed = data.TotalConfirmed.toLocaleString("en");
+              this.TotalDeaths = data.TotalDeaths.toLocaleString("en");
+              this.TotalRecovered = data.TotalRecovered.toLocaleString("en");
 
-              this.NewConfirmed = data.NewConfirmed.toLocaleString('en');
-              this.NewDeaths = data.NewDeaths.toLocaleString('en');
-              this.NewRecovered = data.NewRecovered.toLocaleString('en');
+              this.NewConfirmed = data.NewConfirmed.toLocaleString("en");
+              this.NewDeaths = data.NewDeaths.toLocaleString("en");
+              this.NewRecovered = data.NewRecovered.toLocaleString("en");
 
               num.push(
                 data.TotalConfirmed,
                 data.TotalDeaths,
-                data.TotalRecovered
+                data.TotalRecovered,
+                data.NewConfirmed,
+                data.NewDeaths,
+                data.NewRecovered
               );
             }
           });
+
+          this.labels.push(
+            "Total Confirmed",
+            "Total Deaths",
+            "Total Recovered"
+          );
+          this.data.push(num[0], num[1], num[2]);
         })
         .catch(err => {
           console.log(err);
@@ -199,7 +211,7 @@ export default {
 
   mounted() {
     this.getCovidSummary();
-    this.getCovidStatus('PH');
+    this.getCovidStatus("PH");
   }
 };
 </script>
